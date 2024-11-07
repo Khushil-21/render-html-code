@@ -8,9 +8,12 @@ interface CodeEditorProps {
 
 export default function CodeEditor({ code, setCode }: CodeEditorProps) {
 	const removeNewlines = () => {
-		const cleanCode = code.replaceAll(/[\r\\n]+/g, "");
-
-		setCode(cleanCode);
+		setCode(
+			code
+				.replace(/\\n/g, "\n") // Convert \n string literals to actual newlines
+				.replace(/\\"/g, '"') // Convert \" to "
+				.replace(/\\'/g, "'")
+		); // Convert \' to '
 	};
 
 	return (
@@ -35,9 +38,9 @@ export default function CodeEditor({ code, setCode }: CodeEditorProps) {
 					fontSize: 16,
 					wordWrap: "on",
 					lineNumbers: "on",
-					automaticLayout: true,
-					formatOnPaste: true,
-					formatOnType: true,
+					// automaticLayout: true,
+					// formatOnPaste: true,
+					// formatOnType: true,
 				}}
 			/>
 		</div>
