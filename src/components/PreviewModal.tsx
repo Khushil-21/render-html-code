@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 interface PreviewModalProps {
   code: string;
@@ -7,6 +7,26 @@ interface PreviewModalProps {
 }
 
 export default function PreviewModal({ code, isOpen, onClose }: PreviewModalProps) {
+  useEffect(() => {
+    if (isOpen) {
+      const iframe = document.getElementById("liveFrame") as HTMLIFrameElement;
+      if (iframe) {
+        // Set srcdoc first to ensure same-origin
+        iframe.srcdoc = code;
+        
+        // Wait for iframe to load before accessing document
+        iframe.onload = () => {
+          const iframeDoc = iframe.contentWindow?.document;
+          if (iframeDoc) {
+            iframeDoc.open();
+            iframeDoc.write(code);
+            iframeDoc.close();
+          }
+        };
+      }
+    }
+  }, [code, isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -19,12 +39,12 @@ export default function PreviewModal({ code, isOpen, onClose }: PreviewModalProp
           Close
         </button>
         <iframe
-          srcDoc={code}
-          title="preview-fullscreen"
+          id="liveFrame"
+          sandbox="allow-forms allow-pointer-lock allow-popups allow-scripts allow-same-origin"
+          title="preview"
           className="w-full h-full border-none"
-          sandbox="allow-scripts"
         />
       </div>
     </div>
   );
-} 
+}

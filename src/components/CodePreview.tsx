@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import PreviewModal from "./PreviewModal";
 
 interface CodePreviewProps {
@@ -8,12 +8,22 @@ interface CodePreviewProps {
 export default function CodePreview({ code }: CodePreviewProps) {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
-	// Process the code to properly handle string literals
-	const processedCode = useMemo(() => {
-		return code
-			.replace(/\\n/g, '\n')  // Convert \n string literals to actual newlines
-			.replace(/\\"/g, '"')   // Convert \" to "
-			.replace(/\\'/g, "'");  // Convert \' to '
+	useEffect(() => {
+		const iframe = document.getElementById("previewFrame") as HTMLIFrameElement;
+		if (iframe) {
+			// Set srcdoc first to ensure same-origin
+			iframe.srcdoc = code;
+			
+			// Wait for iframe to load before accessing document
+			iframe.onload = () => {
+				const iframeDoc = iframe.contentWindow?.document;
+				if (iframeDoc) {
+					iframeDoc.open();
+					iframeDoc.write(code);
+					iframeDoc.close();
+				}
+			};
+		}
 	}, [code]);
 
 	return (
@@ -30,7 +40,8 @@ export default function CodePreview({ code }: CodePreviewProps) {
 				</div>
 				<div className="h-[calc(100vh-6rem)] bg-white">
 					<iframe
-						srcDoc={processedCode}
+						id="previewFrame"
+						sandbox="allow-forms allow-pointer-lock allow-popups allow-scripts allow-same-origin"
 						title="preview"
 						className="w-full h-full border-none"
 					/>
@@ -38,7 +49,7 @@ export default function CodePreview({ code }: CodePreviewProps) {
 			</div>
 
 			<PreviewModal
-				code={processedCode}
+				code={code}
 				isOpen={isModalOpen}
 				onClose={() => setIsModalOpen(false)}
 			/>
