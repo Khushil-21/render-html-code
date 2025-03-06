@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 import CodeEditor from "./CodeEditor";
 import CodePreview from "./CodePreview";
+import { useCode } from "@/context/CodeContext";
 
 export default function MainPage() {
-	const [code, setCode] = useState<string>("");
-
+	const { code, setCode } = useCode();
 	const [editorCollapsed, setEditorCollapsed] = useState(false);
 	const [previewCollapsed, setPreviewCollapsed] = useState(false);
 
@@ -21,7 +21,7 @@ export default function MainPage() {
 					className={editorCollapsed ? "w-[50px]" : previewCollapsed ? "w-full" : "w-1/2"}
 				/>
 				<CodePreview 
-					code={code} 
+					code={code}
 					isCollapsed={previewCollapsed}
 					setIsCollapsed={setPreviewCollapsed}
 					className={previewCollapsed ? "w-[50px]" : editorCollapsed ? "w-full" : "w-1/2"}

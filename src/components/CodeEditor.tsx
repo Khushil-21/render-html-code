@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 interface CodeEditorProps {
 	code: string;
@@ -49,25 +49,26 @@ export default function CodeEditor({
 		return (
 			<div className={`bg-blue-50 rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
 				<div 
-					className="h-full flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors"
+					className="h-full flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors flex-col p-2"
 					onClick={() => setIsCollapsed(false)}
 				>
-					<ChevronRight className="w-6 h-6 text-gray-600" />
+					<ChevronRight className="w-5 h-5 text-blue-600 mb-2" />
+					<span className="text-blue-800 font-medium text-xs whitespace-nowrap transform rotate-90">Editor</span>
 				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className={`bg-blue-50 p-3 rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
-			<div className="bg-blue-50 border-b border-blue-100 px-4 pb-2 text-blue-800 font-semibold flex justify-between items-center">
+		<div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
+			<div className="bg-blue-50 border-b border-blue-100 px-4 py-2 text-blue-800 font-semibold flex justify-between items-center">
 				<div className="flex items-center">
 					<button
 						onClick={() => setIsCollapsed(true)}
 						className="text-blue-600 mr-2 hover:bg-blue-100 p-1 rounded-md transition-colors"
 						title="Collapse"
 					>
-						<ChevronLeft className="w-5 h-5" />
+						<ChevronRight className="w-5 h-5" />
 					</button>
 					<span>HTML Editor</span>
 				</div>
@@ -93,7 +94,6 @@ export default function CodeEditor({
 					automaticLayout: true,
 				}}
 				onMount={handleEditorDidMount}
-				className="!rounded-lg"
 			/>
 		</div>
 	);

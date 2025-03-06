@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import PreviewModal from "./PreviewModal";
-import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
+import { ChevronLeft, Maximize2, Smartphone } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCode } from "@/context/CodeContext";
 
 interface CodePreviewProps {
 	code: string;
@@ -18,6 +20,7 @@ export default function CodePreview({
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const animationContainerRef = useRef<HTMLDivElement>(null);
 	const isEmptyHtml = !code.trim() || code.trim() === "<!DOCTYPE html><html><head><title>My HTML</title></head><body></body></html>";
+	const router = useRouter();
 
 	useEffect(() => {
 		const iframe = document.getElementById("previewFrame") as HTMLIFrameElement;
@@ -103,6 +106,10 @@ export default function CodePreview({
 		}
 	}, [isEmptyHtml]);
 
+	const handleResponsivePreview = () => {
+		router.push('/responsive-preview');
+	};
+
 	if (isCollapsed) {
 		return (
 			<div className={`bg-indigo-50 rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
@@ -126,17 +133,28 @@ export default function CodePreview({
 							className="text-indigo-600 mr-2 hover:bg-indigo-100 p-1 rounded-md transition-colors"
 							title="Collapse"
 						>
-							<ChevronRight className="w-5 h-5" />
+							<ChevronLeft className="w-5 h-5" />
 						</button>
 						<span>Preview</span>
 					</div>
-					<button
-						onClick={() => setIsModalOpen(true)}
-						className="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
-					>
-						<Maximize2 className="w-4 h-4 mr-1" />
-						Fullscreen
-					</button>
+					<div className="flex items-center space-x-2">
+						<button
+							onClick={handleResponsivePreview}
+							className="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
+							title="Preview on different devices"
+							disabled={isEmptyHtml}
+						>
+							<Smartphone className="w-4 h-4 mr-1" />
+							Devices
+						</button>
+						<button
+							onClick={() => setIsModalOpen(true)}
+							className="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
+						>
+							<Maximize2 className="w-4 h-4 mr-1" />
+							Fullscreen
+						</button>
+					</div>
 				</div>
 				<div className="h-[calc(100vh-6rem)] bg-white relative">
 					{isEmptyHtml ? (
