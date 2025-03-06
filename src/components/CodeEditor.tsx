@@ -47,9 +47,9 @@ export default function CodeEditor({
 
 	if (isCollapsed) {
 		return (
-			<div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
+			<div className={`bg-blue-50 rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
 				<div 
-					className="h-full flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors"
+					className="h-full flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors"
 					onClick={() => setIsCollapsed(false)}
 				>
 					<ChevronRight className="w-6 h-6 text-gray-600" />
@@ -59,8 +59,8 @@ export default function CodeEditor({
 	}
 
 	return (
-		<div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
-			<div className="bg-blue-50 border-b border-blue-100 px-4 py-2 text-blue-800 font-semibold flex justify-between items-center">
+		<div className={`bg-blue-50 p-3 rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
+			<div className="bg-blue-50 border-b border-blue-100 px-4 pb-2 text-blue-800 font-semibold flex justify-between items-center">
 				<div className="flex items-center">
 					<button
 						onClick={() => setIsCollapsed(true)}
@@ -93,6 +93,7 @@ export default function CodeEditor({
 					automaticLayout: true,
 				}}
 				onMount={handleEditorDidMount}
+				className="!rounded-lg"
 			/>
 		</div>
 	);

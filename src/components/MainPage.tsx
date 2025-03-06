@@ -5,16 +5,7 @@ import CodeEditor from "./CodeEditor";
 import CodePreview from "./CodePreview";
 
 export default function MainPage() {
-	const [code, setCode] = useState<string>(`<!DOCTYPE html>
-<html>
-<head>
-	<title>My HTML</title>
-</head>
-<body>
-	<h1>Hello World!</h1>
-	<p>Start editing to see changes</p>
-</body>
-</html>`);
+	const [code, setCode] = useState<string>("");
 
 	const [editorCollapsed, setEditorCollapsed] = useState(false);
 	const [previewCollapsed, setPreviewCollapsed] = useState(false);
