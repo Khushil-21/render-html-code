@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import PreviewModal from "./PreviewModal";
 import { ChevronLeft, Maximize2, Smartphone } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCode } from "@/context/CodeContext";
 
 interface CodePreviewProps {
 	code: string;
