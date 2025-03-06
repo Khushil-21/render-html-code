@@ -51,11 +51,11 @@ export default function CodePreview({
 	return (
 		<>
 			<div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
-				<div className="bg-white border-b px-4 py-2 text-gray-800 font-semibold flex justify-between items-center">
+				<div className="bg-indigo-50 border-b border-indigo-100 px-4 py-2 text-indigo-800 font-semibold flex justify-between items-center">
 					<div className="flex items-center">
 						<button
 							onClick={() => setIsCollapsed(true)}
-							className="text-gray-600 mr-2 hover:bg-gray-100 p-1 rounded-md transition-colors"
+							className="text-indigo-600 mr-2 hover:bg-indigo-100 p-1 rounded-md transition-colors"
 							title="Collapse"
 						>
 							<ChevronRight className="w-5 h-5" />
@@ -64,7 +64,7 @@ export default function CodePreview({
 					</div>
 					<button
 						onClick={() => setIsModalOpen(true)}
-						className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
+						className="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
 					>
 						<Maximize2 className="w-4 h-4 mr-1" />
 						Fullscreen

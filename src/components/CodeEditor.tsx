@@ -60,11 +60,11 @@ export default function CodeEditor({
 
 	return (
 		<div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
-			<div className="bg-white border-b px-4 py-2 text-gray-800 font-semibold flex justify-between items-center">
+			<div className="bg-blue-50 border-b border-blue-100 px-4 py-2 text-blue-800 font-semibold flex justify-between items-center">
 				<div className="flex items-center">
 					<button
 						onClick={() => setIsCollapsed(true)}
-						className="text-gray-600 mr-2 hover:bg-gray-100 p-1 rounded-md transition-colors"
+						className="text-blue-600 mr-2 hover:bg-blue-100 p-1 rounded-md transition-colors"
 						title="Collapse"
 					>
 						<ChevronLeft className="w-5 h-5" />
