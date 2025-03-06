@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 interface PreviewModalProps {
   code: string;
@@ -7,6 +7,9 @@ interface PreviewModalProps {
 }
 
 export default function PreviewModal({ code, isOpen, onClose }: PreviewModalProps) {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  
+
   useEffect(() => {
     if (isOpen) {
       const iframe = document.getElementById("liveFrame") as HTMLIFrameElement;
@@ -24,27 +27,58 @@ export default function PreviewModal({ code, isOpen, onClose }: PreviewModalProp
           }
         };
       }
+
+      // Request fullscreen when modal opens
+      const previewContainer = document.getElementById("previewContainer");
+      if (previewContainer && !isFullscreen) {
+        try {
+          previewContainer.requestFullscreen()
+            .then(() => setIsFullscreen(true))
+            .catch(err => console.error("Error attempting to enable fullscreen:", err));
+        } catch (err) {
+          console.error("Error attempting to enable fullscreen:", err);
+        }
+      }
     }
-  }, [code, isOpen]);
+
+    // Exit fullscreen when modal closes
+    return () => {
+      if (isFullscreen && document.fullscreenElement) {
+        document.exitFullscreen()
+          .then(() => setIsFullscreen(false))
+          .catch(err => console.error("Error attempting to exit fullscreen:", err));
+      }
+    };
+  }, [code, isOpen, isFullscreen]);
+
+  // Listen for fullscreen change events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen) {
+        setIsFullscreen(false);
+        onClose();
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, [isFullscreen, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white w-[90vw] h-[90vh] rounded-lg overflow-hidden relative">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 bg-gray-800 text-white p-2 rounded-lg hover:bg-gray-700"
-        >
-          Close
-        </button>
-        <iframe
-          id="liveFrame"
-          sandbox="allow-forms allow-pointer-lock allow-popups allow-scripts allow-same-origin"
-          title="preview"
-          className="w-full h-full border-none"
-        />
-      </div>
+    <div 
+      id="previewContainer"
+      className="fixed inset-0 bg-white z-50 flex flex-col"
+   
+    >
+
+      <iframe
+        id="liveFrame"
+        sandbox="allow-forms allow-pointer-lock allow-popups allow-scripts allow-same-origin"
+        title="preview"
+        className="w-full h-full border-none"
+      />
     </div>
   );
 }

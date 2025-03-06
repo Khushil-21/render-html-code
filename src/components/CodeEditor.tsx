@@ -1,12 +1,25 @@
-import React from "react";
-import Editor from "@monaco-editor/react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useRef } from "react";
+import Editor, { OnMount } from "@monaco-editor/react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CodeEditorProps {
 	code: string;
 	setCode: (code: string) => void;
+	isCollapsed?: boolean;
+	setIsCollapsed?: (collapsed: boolean) => void;
+	className?: string;
 }
 
-export default function CodeEditor({ code, setCode }: CodeEditorProps) {
+export default function CodeEditor({ 
+	code, 
+	setCode, 
+	isCollapsed = false, 
+	setIsCollapsed = () => {}, 
+	className = "w-1/2" 
+}: CodeEditorProps) {
+	const editorRef = useRef<any>(null);
+
 	const removeNewlines = () => {
 		setCode(
 			code
@@ -16,13 +29,52 @@ export default function CodeEditor({ code, setCode }: CodeEditorProps) {
 		); // Convert \' to '
 	};
 
+	// Handle editor mounting and setup paste event listener
+	const handleEditorDidMount: OnMount = (editor) => {
+		editorRef.current = editor;
+		
+		// Add paste event listener to the editor's DOM node
+		const editorDomNode = editor.getDomNode();
+		if (editorDomNode) {
+			editorDomNode.addEventListener('paste', () => {
+				// Use setTimeout to let the paste complete first before processing
+				setTimeout(() => {
+					removeNewlines();
+				}, 10);
+			});
+		}
+	};
+
+	if (isCollapsed) {
+		return (
+			<div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
+				<div 
+					className="h-full flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors"
+					onClick={() => setIsCollapsed(false)}
+				>
+					<ChevronRight className="w-6 h-6 text-gray-600" />
+				</div>
+			</div>
+		);
+	}
+
 	return (
-		<div className="w-1/2 bg-gray-800 rounded-lg overflow-hidden">
-			<div className="bg-gray-700 px-4 py-2 text-white font-semibold flex justify-between items-center">
-				<span>HTML Editor</span>
+		<div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
+			<div className="bg-white border-b px-4 py-2 text-gray-800 font-semibold flex justify-between items-center">
+				<div className="flex items-center">
+					<button
+						onClick={() => setIsCollapsed(true)}
+						className="text-gray-600 mr-2 hover:bg-gray-100 p-1 rounded-md transition-colors"
+						title="Collapse"
+					>
+						<ChevronLeft className="w-5 h-5" />
+					</button>
+					<span>HTML Editor</span>
+				</div>
 				<button
 					onClick={removeNewlines}
-					className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-md text-sm"
+					className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-md text-sm text-white transition-colors"
+					title="Remove escape sequences like \n to actual newlines"
 				>
 					Remove Newlines
 				</button>
@@ -32,16 +84,15 @@ export default function CodeEditor({ code, setCode }: CodeEditorProps) {
 				defaultLanguage="html"
 				value={code}
 				onChange={(value) => setCode(value || "")}
-				theme="vs-dark"
+				theme="vs-light"
 				options={{
 					minimap: { enabled: false },
 					fontSize: 16,
 					wordWrap: "on",
 					lineNumbers: "on",
-					// automaticLayout: true,
-					// formatOnPaste: true,
-					// formatOnType: true,
+					automaticLayout: true,
 				}}
+				onMount={handleEditorDidMount}
 			/>
 		</div>
 	);

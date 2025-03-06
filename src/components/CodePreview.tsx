@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from "react";
 import PreviewModal from "./PreviewModal";
+import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 
 interface CodePreviewProps {
 	code: string;
+	isCollapsed?: boolean;
+	setIsCollapsed?: (collapsed: boolean) => void;
+	className?: string;
 }
 
-export default function CodePreview({ code }: CodePreviewProps) {
+export default function CodePreview({ 
+	code, 
+	isCollapsed = false, 
+	setIsCollapsed = () => {}, 
+	className = "w-1/2" 
+}: CodePreviewProps) {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	useEffect(() => {
@@ -26,15 +35,38 @@ export default function CodePreview({ code }: CodePreviewProps) {
 		}
 	}, [code]);
 
+	if (isCollapsed) {
+		return (
+			<div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
+				<div 
+					className="h-full flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors"
+					onClick={() => setIsCollapsed(false)}
+				>
+					<ChevronLeft className="w-6 h-6 text-gray-600" />
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<>
-			<div className="w-1/2 bg-gray-800 rounded-lg overflow-hidden">
-				<div className="bg-gray-700 px-4 py-2 text-white font-semibold flex justify-between items-center">
-					<span>Preview</span>
+			<div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
+				<div className="bg-white border-b px-4 py-2 text-gray-800 font-semibold flex justify-between items-center">
+					<div className="flex items-center">
+						<button
+							onClick={() => setIsCollapsed(true)}
+							className="text-gray-600 mr-2 hover:bg-gray-100 p-1 rounded-md transition-colors"
+							title="Collapse"
+						>
+							<ChevronRight className="w-5 h-5" />
+						</button>
+						<span>Preview</span>
+					</div>
 					<button
 						onClick={() => setIsModalOpen(true)}
-						className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded-md text-sm"
+						className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
 					>
+						<Maximize2 className="w-4 h-4 mr-1" />
 						Fullscreen
 					</button>
 				</div>
