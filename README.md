@@ -36,10 +36,3 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 
-currently whta is on / route will be now transfered to /renderer
-and / route will be home page where we see local storage and has one btn to navigate to renderer page 
-
-with remove new lines button i want to add 2 more buttons 
-- Save code : which opens a popup and ask user a name and with that name saves the code in the localstorage 
-- View codes : redirect to / route where we can see all codes from local storage with all CRUD opreqations and also there will be button in all code "see in editor" then it will redirect to /renderer/{{slug}} with this dynamic slug it will render every code from local storrage 
-and if slug is not presenet then its basic editor where user can paste their code similar to what we have currently 
