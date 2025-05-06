@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
-import { ChevronRight, Save, List } from "lucide-react";
+import { ChevronRight, Save, List, ChevronDown, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import SaveCodeModal from "./SaveCodeModal";
 
@@ -11,6 +11,8 @@ interface CodeEditorProps {
 	isCollapsed?: boolean;
 	setIsCollapsed?: (collapsed: boolean) => void;
 	className?: string;
+	availableFiles?: string[];
+	handleFileChange?: (filename: string) => void;
 }
 
 export default function CodeEditor({ 
@@ -18,11 +20,26 @@ export default function CodeEditor({
 	setCode, 
 	isCollapsed = false, 
 	setIsCollapsed = () => {}, 
-	className = "w-1/2" 
+	className = "w-1/2",
+	availableFiles = ["index.html"],
+	handleFileChange = () => {}
 }: CodeEditorProps) {
 	const editorRef = useRef<any>(null);
 	const router = useRouter();
 	const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+	const [currentFile, setCurrentFile] = useState(availableFiles[0] || "index.html");
+	const [showFileDropdown, setShowFileDropdown] = useState(false);
+	const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+	const dropdownRef = useRef<HTMLDivElement>(null);
+	const settingsDropdownRef = useRef<HTMLDivElement>(null);
+
+	// Update current file when availableFiles changes
+	useEffect(() => {
+		if (availableFiles.length > 0 && !availableFiles.includes(currentFile)) {
+			setCurrentFile(availableFiles[0]);
+			handleFileChange(availableFiles[0]);
+		}
+	}, [availableFiles, currentFile, handleFileChange]);
 
 	const removeNewlines = () => {
 		setCode(
@@ -49,12 +66,37 @@ export default function CodeEditor({
 		}
 	};
 
+	// Close dropdown when clicking outside
+	useEffect(() => {
+		if (!showFileDropdown && !showSettingsDropdown) return;
+		
+		const handleClickOutside = (event: MouseEvent) => {
+			if (showFileDropdown && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+				setShowFileDropdown(false);
+			}
+			if (showSettingsDropdown && settingsDropdownRef.current && !settingsDropdownRef.current.contains(event.target as Node)) {
+				setShowSettingsDropdown(false);
+			}
+		};
+		
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [showFileDropdown, showSettingsDropdown]);
+
 	const handleSaveCode = () => {
 		setIsSaveModalOpen(true);
 	};
 
 	const handleViewCodes = () => {
 		router.push('/');
+	};
+
+	const handleFileSelect = (filename: string) => {
+		setCurrentFile(filename);
+		setShowFileDropdown(false);
+		handleFileChange(filename);
 	};
 
 	if (isCollapsed) {
@@ -84,15 +126,66 @@ export default function CodeEditor({
 							<ChevronRight className="w-5 h-5" />
 						</button>
 						<span>HTML Editor</span>
+						
+						{/* File selector dropdown */}
+						{availableFiles.length > 1 && (
+							<div className="relative ml-3">
+								<button
+									onClick={() => setShowFileDropdown(!showFileDropdown)}
+									className="bg-white border border-blue-200 hover:bg-blue-50 px-2 py-1 rounded-md text-sm text-gray-700 transition-colors flex items-center"
+								>
+									{currentFile}
+									<ChevronDown className="w-4 h-4 ml-1" />
+								</button>
+								
+								{showFileDropdown && (
+									<div 
+										ref={dropdownRef}
+										className="absolute top-full left-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 z-10 w-48"
+									>
+										{availableFiles.map(file => (
+											<div 
+												key={file} 
+												className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50 ${currentFile === file ? 'bg-blue-50 text-blue-700' : 'text-gray-700'}`}
+												onClick={() => handleFileSelect(file)}
+											>
+												{file}
+											</div>
+										))}
+									</div>
+								)}
+							</div>
+						)}
 					</div>
 					<div className="flex gap-2">
-						<button
-							onClick={removeNewlines}
-							className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-md text-sm text-white transition-colors"
-							title="Remove escape sequences like \n to actual newlines"
-						>
-							Remove Newlines
-						</button>
+						{/* Settings dropdown */}
+						<div className="relative">
+							<button
+								onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
+								className="bg-gray-100 hover:bg-gray-200 p-2 rounded-md text-gray-700 transition-colors"
+								title="Settings"
+							>
+								<Settings className="w-4 h-4" />
+							</button>
+							
+							{showSettingsDropdown && (
+								<div 
+									ref={settingsDropdownRef}
+									className="absolute top-full right-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 z-10 w-48"
+								>
+									<div 
+										className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 text-gray-700"
+										onClick={() => {
+											removeNewlines();
+											setShowSettingsDropdown(false);
+										}}
+									>
+										Remove Escape Sequences
+									</div>
+								</div>
+							)}
+						</div>
+						
 						<button
 							onClick={handleSaveCode}
 							className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
@@ -101,6 +194,7 @@ export default function CodeEditor({
 							<Save className="w-4 h-4 mr-1" />
 							Save Code
 						</button>
+						
 						<button
 							onClick={handleViewCodes}
 							className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
@@ -132,6 +226,7 @@ export default function CodeEditor({
 				isOpen={isSaveModalOpen} 
 				onClose={() => setIsSaveModalOpen(false)}
 				code={code}
+				isMultiPage={availableFiles.length > 1}
 			/>
 		</>
 	);

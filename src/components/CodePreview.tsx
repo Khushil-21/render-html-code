@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import PreviewModal from "./PreviewModal";
-import { ChevronLeft, Maximize2, Smartphone } from "lucide-react";
+import JsonToCodeModal from "./JsonToCodeModal";
+import { ChevronLeft, Maximize2, Smartphone, FileJson, ChevronDown, ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface CodePreviewProps {
@@ -8,18 +9,34 @@ interface CodePreviewProps {
 	isCollapsed?: boolean;
 	setIsCollapsed?: (collapsed: boolean) => void;
 	className?: string;
+	availableFiles?: string[];
+	handleFileChange?: (filename: string) => void;
 }
 
 export default function CodePreview({ 
 	code, 
 	isCollapsed = false, 
 	setIsCollapsed = () => {}, 
-	className = "w-1/2" 
+	className = "w-1/2",
+	availableFiles = ["index.html"],
+	handleFileChange = () => {}
 }: CodePreviewProps) {
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
+	const [currentFile, setCurrentFile] = useState(availableFiles[0] || "index.html");
+	const [showFileDropdown, setShowFileDropdown] = useState(false);
 	const animationContainerRef = useRef<HTMLDivElement>(null);
 	const isEmptyHtml = !code.trim() || code.trim() === "<!DOCTYPE html><html><head><title>My HTML</title></head><body></body></html>";
 	const router = useRouter();
+	const dropdownRef = useRef<HTMLDivElement>(null);
+
+	// Update current file when availableFiles changes
+	useEffect(() => {
+		if (availableFiles.length > 0 && !availableFiles.includes(currentFile)) {
+			setCurrentFile(availableFiles[0]);
+			handleFileChange(availableFiles[0]);
+		}
+	}, [availableFiles, currentFile, handleFileChange]);
 
 	useEffect(() => {
 		const iframe = document.getElementById("previewFrame") as HTMLIFrameElement;
@@ -38,6 +55,22 @@ export default function CodePreview({
 			};
 		}
 	}, [code]);
+
+	// Close dropdown when clicking outside
+	useEffect(() => {
+		if (!showFileDropdown) return;
+		
+		const handleClickOutside = (event: MouseEvent) => {
+			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+				setShowFileDropdown(false);
+			}
+		};
+		
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [showFileDropdown]);
 
 	// Animation effect for empty state
 	useEffect(() => {
@@ -109,6 +142,16 @@ export default function CodePreview({
 		router.push('/responsive-preview');
 	};
 
+	const handleMultiFilePreview = () => {
+		router.push('/multi-renderer');
+	};
+
+	const handleFileSelect = (filename: string) => {
+		setCurrentFile(filename);
+		setShowFileDropdown(false);
+		handleFileChange(filename);
+	};
+
 	if (isCollapsed) {
 		return (
 			<div className={`bg-indigo-50 rounded-lg shadow-md overflow-hidden transition-all duration-300 ${className}`}>
@@ -135,8 +178,59 @@ export default function CodePreview({
 							<ChevronLeft className="w-5 h-5" />
 						</button>
 						<span>Preview</span>
+						
+						{/* File selector dropdown - only show if we have multiple files */}
+						{availableFiles.length > 1 && (
+							<div className="relative ml-3">
+								<button
+									onClick={() => setShowFileDropdown(!showFileDropdown)}
+									className="bg-white border border-indigo-200 hover:bg-indigo-50 px-2 py-1 rounded-md text-sm text-gray-700 transition-colors flex items-center"
+								>
+									{currentFile}
+									<ChevronDown className="w-4 h-4 ml-1" />
+								</button>
+								
+								{showFileDropdown && (
+									<div 
+										ref={dropdownRef}
+										className="absolute top-full left-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 z-10 w-48"
+									>
+										{availableFiles.map(file => (
+											<div 
+												key={file} 
+												className={`px-4 py-2 text-sm cursor-pointer hover:bg-indigo-50 ${currentFile === file ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700'}`}
+												onClick={() => handleFileSelect(file)}
+											>
+												{file}
+											</div>
+										))}
+									</div>
+								)}
+							</div>
+						)}
 					</div>
 					<div className="flex items-center space-x-2">
+						<button
+							onClick={() => setIsJsonModalOpen(true)}
+							className="bg-amber-600 hover:bg-amber-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
+							title="JSON to Code"
+						>
+							<FileJson className="w-4 h-4 mr-1" />
+							JSON to Code
+						</button>
+						
+						{availableFiles.length <= 1 && (
+							<button
+								onClick={handleMultiFilePreview}
+								className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
+								title="Multi-file Preview"
+								disabled={isEmptyHtml}
+							>
+								<ExternalLink className="w-4 h-4 mr-1" />
+								Multi-page
+							</button>
+						)}
+						
 						<button
 							onClick={handleResponsivePreview}
 							className="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
@@ -146,9 +240,11 @@ export default function CodePreview({
 							<Smartphone className="w-4 h-4 mr-1" />
 							Devices
 						</button>
+						
 						<button
 							onClick={() => setIsModalOpen(true)}
 							className="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-md text-sm text-white transition-colors flex items-center"
+							title="Open fullscreen preview"
 						>
 							<Maximize2 className="w-4 h-4 mr-1" />
 							Fullscreen
@@ -176,6 +272,11 @@ export default function CodePreview({
 				code={code}
 				isOpen={isModalOpen}
 				onClose={() => setIsModalOpen(false)}
+			/>
+			
+			<JsonToCodeModal
+				isOpen={isJsonModalOpen}
+				onClose={() => setIsJsonModalOpen(false)}
 			/>
 		</>
 	);
